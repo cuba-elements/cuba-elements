@@ -1,0 +1,14 @@
+{
+  "name": "cuba-elements",
+  "version": "0.2.0",
+  "main": [
+    "cuba-elements.html"
+  ],
+  "dependencies": {
+    "cuba-app": "cuba-elements/cuba-app#^0.2.0",
+    "cuba-data": "cuba-elements/cuba-data#^0.2.0",
+    "cuba-form": "cuba-elements/cuba-form#^0.2.0",
+    "cuba-login": "cuba-elements/cuba-login#^0.2.0",
+    "cuba-styles": "cuba-elements/cuba-styles#^0.1.0"
+  }
+}

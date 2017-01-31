@@ -1,0 +1,60 @@
+<script>
+
+  /**
+   * Exposes bean validation errors.
+   *
+   * @polymerBehavior CubaFormBehavior
+   */
+
+  CubaFormBehavior = {
+
+    properties: {
+      /**
+       * Map of errors returned by REST API (bean validation) {fieldPath: concatenatedErrorMessage, ...}.
+       */
+      serverErrors: {
+        type: Object,
+        notify: true,
+        readonly: true,
+        value: function() {
+          return {};
+        }
+      },
+      /**
+       * Raw list of errors returned by REST API (bean validation).
+       */
+      rawServerErrors: {
+        type: Array,
+        notify: true,
+        readonly: true,
+        value: function() {
+          return [];
+        }
+      }
+    },
+
+    _clearErrors: function() {
+      this.set("serverErrors", {});
+      this.set("rawServerErrors", []);
+    },
+
+    _handleError: function(result) {
+      var resp = result.response;
+      if (resp.status == 400) {
+        resp.json().then(function(errors) {
+          this.set("rawServerErrors", errors);
+          for (var i = 0; i < errors.length; i++) {
+            let path = errors[i].path || "$global";
+            this._addError(path, errors[i].message)
+          }
+        }.bind(this));
+      }
+    },
+
+    _addError: function(path, errorMessage) {
+      this.serverErrors[path] ? this.serverErrors[path] += "; " + errorMessage : this.serverErrors[path] = errorMessage;
+      this.notifyPath("serverErrors." + path);
+    }
+  }
+
+</script>

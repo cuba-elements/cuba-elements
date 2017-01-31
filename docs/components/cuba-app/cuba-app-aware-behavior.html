@@ -1,0 +1,42 @@
+<script>
+  (function() {
+
+    /**
+     * @polymerBehavior CubaAppAwareBehavior
+     */
+    CubaAppAwareBehavior = {
+
+      properties: {
+        app: {
+          type: Object,
+          notify: true,
+          readOnly: true
+        },
+        appName: {
+          type: String,
+          value: '',
+          observer: '_appNameChanged'
+        }
+      },
+
+      _appNameChanged: function(appName) {
+        if (this.app && this.app.name === appName) {
+          return;
+        }
+        var _this = this;
+        var app = cuba.getApp(appName);
+        if (app != null) {
+          this._setApp(app);
+        } else { // wait until app initalized
+          window.addEventListener('cuba-app-initialized',
+            function cubaAppInitialized(event) {
+              window.removeEventListener('cuba-app-initialized', cubaAppInitialized);
+              _this._appNameChanged(_this.appName);
+            });
+        }
+      }
+
+    }
+
+  })();
+</script>

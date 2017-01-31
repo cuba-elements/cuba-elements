@@ -1,0 +1,80 @@
+<link rel="import" href="../polymer/polymer.html">
+<dom-module id="cuba-styles">
+  <template>
+    <style>
+      paper-card.page-widget {
+        display: block;
+        margin-bottom: 24px;
+        --paper-card-header-text: {
+          font-size: 20px;
+          font-weight: 300;
+        };
+      }
+      @media (max-width: 1366px) {
+        paper-card.page-widget {
+          margin-bottom: 10px;
+        }
+      }
+      paper-card {
+        --paper-card-content: {
+          @apply(--paper-font-body1);
+          padding-top: 0;
+        }
+      }
+      paper-card .card-actions {
+        display: flex;
+        justify-content: flex-end;
+      }
+
+      cuba-entity-form paper-checkbox {
+        margin-top: 36px;
+      }
+      cuba-entity-form .errors {
+        margin-top: 20px;
+        color: var(--error-color);
+      }
+      paper-toolbar.list-toolbar {
+        --paper-toolbar-background: transparent;
+        --paper-toolbar-color: var(--light-theme-text-color);
+      }
+      paper-toolbar.list-toolbar {
+        margin-bottom: 20px;
+      }
+      paper-toolbar.list-toolbar .title {
+        text-align: center;
+      }
+      .item-list .row {
+        @apply(--paper-font-common-base);
+        padding: 16px;
+        display: flex;
+      }
+      .item-list .row:hover {
+        background: #fafafa;
+      }
+      .item-list .row .title {
+        padding: 12px;
+        width: 150px;
+        font-size: 14px;
+      }
+      .item-list .row .description {
+        padding: 12px;
+        flex-grow: 1;
+        font-size: 14px;
+        color: #757575;;
+      }
+      .item-list .row .actions {
+        color: #999;
+      }
+      .item-list .row .actions  paper-menu-button {
+        padding: 0;
+      }
+      .item-list .row:not(:nth-last-child(2)) {
+        border-bottom: 1px solid #e8e8e8;
+      }
+      paper-button.load-more {
+        display: block;
+        text-align: center;
+      }
+    </style>
+  </template>
+</dom-module>

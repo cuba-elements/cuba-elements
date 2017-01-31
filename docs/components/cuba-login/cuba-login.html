@@ -1,0 +1,101 @@
+<link rel="import" href="../polymer/polymer.html">
+
+<link rel="import" href="../paper-button/paper-button.html">
+<link rel="import" href="../paper-input/paper-input.html">
+
+<link rel="import" href="../iron-a11y-keys/iron-a11y-keys.html"/>
+
+<link rel="import" href="../cuba-app/cuba-app-aware-behavior.html"/>
+<link rel="import" href="../cuba-app/cuba-localize-behavior.html"/>
+
+<!--
+`cuba-login` - basic login form.
+-->
+
+<dom-module id="cuba-login">
+  <template>
+    <style>
+      :host {
+        display: block;
+      }
+      #form {
+        @apply(--cuba-login-form);
+      }
+      #username {
+        @apply(--cuba-login-username-input);
+      }
+      #password {
+        @apply(--cuba-login-password-input);
+      }
+      #submit {
+        @apply(--cuba-login-submit-button);
+      }
+      .actions {
+        display: flex;
+        flex-direction: row-reverse;
+        @apply(--cuba-login-actions);
+      }
+
+    </style>
+
+    <form id="form">
+      <div class="fields">
+        <paper-input type="text" id="username" label="[[msg('User Name')]]" value="{{username}}"></paper-input>
+        <paper-input type="password" id="password" label="[[msg('Password')]]" value="{{password}}"></paper-input>
+      </div>
+      <div class="actions">
+        <paper-button id="submit" on-tap="submit">[[msg('Login')]]</paper-button>
+      </div>
+    </form>
+    <iron-a11y-keys id="a11y" target="[[_keysTarget]]" keys="enter"
+                    on-keys-pressed="submit"></iron-a11y-keys>
+  </template>
+
+  <script>
+    Polymer({
+
+      is: 'cuba-login',
+
+      behaviors: [CubaLocalizeBehavior, CubaAppAwareBehavior],
+
+      properties: {
+        username: {
+          type: String,
+          value: null
+        },
+        password: {
+          type: String,
+          value: null
+        },
+        _keysTarget: {
+          type: Object,
+          value: function() {
+            return this.$$('.fields');
+          }
+        }
+      },
+
+      submit: function() {
+        this.app.login(this.username, this.password).then(
+            function(resp) {
+              this.fire('cuba-login-success');
+            }.bind(this),
+            function() {
+              this.fire('cuba-login-error');
+            }.bind(this)
+        );
+      }
+
+    });
+
+    /**
+     * Fired on successful login
+     * @event cuba-login-success
+     */
+
+    /**
+     * Fired on login error
+     * @event cuba-login-error
+     */
+  </script>
+</dom-module>

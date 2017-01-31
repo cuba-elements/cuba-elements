@@ -1,0 +1,133 @@
+<link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="../cuba-app/cuba-app-aware-behavior.html">
+<link rel="import" href="cuba-data-loading-behavior.html">
+<!--
+The `cuba-query` element provides an ability to load list of entities using predefined query.
+See https://doc.cuba-platform.com/manual-latest/rest_api_v2_queries_config.html
+-->
+
+<dom-module id="cuba-query">
+  <template>
+    <style>
+      :host {
+        display: none;
+      }
+    </style>
+  </template>
+
+  <script>
+    Polymer({
+
+      is: 'cuba-query',
+
+      behaviors: [CubaAppAwareBehavior, CubaDataLoadingBehavior],
+
+      properties: {
+        /**
+         * Entity name as specified in domain model class via `@Entity` annotation e.g. sec$User
+         */
+        entityName: String,
+
+        queryName: String,
+        /**
+         * Query params
+         */
+        params: {
+          type: Object,
+          value: function() {
+            return {}
+          }
+        },
+
+        provideCount: {
+          type: Boolean,
+          value: false
+        },
+
+        count: {
+          type: Number,
+          notify: true,
+          readOnly: true
+        },
+
+        _loadMoreOffset: {
+          type: Number,
+          value: null
+        }
+      },
+
+      observers: [
+        '_optionsChanged(app, entityName, queryName, params.*, auto)',
+        '_countOptionsChanged(app, entityName, queryName, params.*, auto, provideCount)'
+      ],
+
+      remove: function(entity) {
+        return this.app.deleteEntity(entity._entityName, entity.id).then(function() {
+          if (!this.data || !Array.isArray(this.data)) {
+            return;
+          }
+          if (this.provideCount) {
+            this.loadCount();
+          }
+          for (var i = 0; i < this.data.length; i++) {
+            if (this.data[i].id === entity.id) {
+              this.splice("data", i, 1);
+            }
+          }
+        }.bind(this));
+      },
+
+      loadMore: function () {
+        if (!this.data) {
+          throw new Error('Data is not loaded yet');
+        }
+        if (!this.params.limit) {
+          throw new Error('Limit is not specified');
+        }
+
+        if (!this._loadMoreOffset) {
+          this._loadMoreOffset = (this.offset ? parseInt(this.offset) : 0) + parseInt(this.params.limit);
+        } else {
+          this._loadMoreOffset += parseInt(this.params.limit);
+        }
+        var params = JSON.parse(JSON.stringify(this.params)); //todo
+        params.offset = this._loadMoreOffset;
+        this._setLoading(true);
+
+        return this.app.query(this.entityName, this.queryName, params).then(
+          function (data) {
+            data.forEach(function (v) {
+              this.push('data', v);
+            }.bind(this));
+            this._setLoading(false);
+          }.bind(this),
+          function() {
+            this._setLoading(false);
+            this.fire("cuba-data-loading-error");
+          }.bind(this)
+        );
+      },
+
+      loadCount: function() {
+        var loadCountPromise = this.app.queryCount(this.entityName, this.queryName, this.params);
+        loadCountPromise.then(function (count) {
+          this._setCount(parseInt(count));
+        }.bind(this));
+        return loadCountPromise;
+      },
+
+
+      _load: function() {
+        this._loadMoreOffset = null;
+        return this.app.query(this.entityName, this.queryName, this.params);
+      },
+
+      _countOptionsChanged: function(entityName, queryName, params, auto, provideCount) {
+        if (auto && provideCount) {
+          this.loadCount();
+        }
+      }
+
+    });
+  </script>
+</dom-module>

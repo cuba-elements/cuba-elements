@@ -1,0 +1,64 @@
+<link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="../cuba-app/cuba-app-aware-behavior.html">
+<link rel="import" href="cuba-form-behavior.html">
+
+<!--
+`cuba-service-form`
+-->
+
+<dom-module id="cuba-service-form">
+  <template>
+    <style>
+      :host {
+        display: block;
+      }
+    </style>
+    <form id="form">
+      <content></content>
+    </form>
+  </template>
+
+  <script>
+    Polymer({
+
+      is: 'cuba-service-form',
+
+      behaviors: [CubaAppAwareBehavior, CubaFormBehavior],
+
+      properties: {
+        serviceName: String,
+        method: String,
+        params: {
+          type: Object
+        },
+        result: {
+          type: Object,
+          notify: true,
+          readOnly: true
+        }
+      },
+
+      ready: function() {
+        this.$.form.addEventListener('submit', function(event) {
+          event.preventDefault();
+          this.submit();
+          return false;
+        }.bind(this));
+      },
+
+      /**
+       * Send data to server.
+       */
+      submit: function() {
+        this._clearErrors();
+        return this.app.invokeService(this.serviceName, this.method, this.params).then(function(resp) {
+          this.result = resp;
+          this.fire('cuba-form-response');
+        }.bind(this), function(errResp) {
+          this._handleError(errResp);
+          this.fire('cuba-form-error');
+        }.bind(this));
+      }
+    });
+  </script>
+</dom-module>

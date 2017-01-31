@@ -1,0 +1,93 @@
+<script>
+
+  /**
+   * In order to use this behavior:
+   * 1. _load method should be overridden. It must return jqXHR promise.
+   * 2. Call _optionsChanged method on meaningful properties changes/initialization i.e:
+   *
+   *  `observers: ['_optionsChanged(serviceName, method, handleAs, auto)']`
+   * @polymerBehavior CubaDataLoadingBehavior
+   */
+
+  CubaDataLoadingBehavior = {
+
+    /**
+     * Fired when data loading failed.
+     *
+     * @event cuba-data-loading-error
+     */
+    properties: {
+      /**
+       * If true - automatically loads data.
+       */
+      auto: {
+        type: Boolean,
+        value: true
+      },
+      /**
+       * Loaded data
+       */
+      data: {
+        notify: true,
+        readOnly: true
+      },
+      /**
+       * Amount of time (in milliseconds) to send a request after property change (to prevent frequent requests).
+       */
+      debounceDuration: {
+        type: Number,
+        value: 0
+      },
+      /**
+       * Indicates whether last request is pending.
+       */
+      loading: {
+        type: Boolean,
+        notify: true,
+        readOnly: true
+      }
+    },
+
+    /**
+     * Loads data.
+     * Returns Promise.
+     */
+    load: function() {
+      return new Promise(function(resolve, reject) {
+        this.debounce('loading', function() {
+          this._setLoading(true);
+          this.loadRequest = this._load();
+          if (!this.loadRequest) {
+            return;
+          }
+          this.loadRequest.then(
+            function(data) {
+              this._setLoading(false);
+              this._setData(data);
+              resolve(data);
+            }.bind(this),
+            function() {
+              this._setLoading(false);
+              this.fire("cuba-data-loading-error");
+              reject('Failed to load data');
+            }.bind(this)
+          );
+        }, this.debounceDuration);
+      }.bind(this));
+    },
+
+    _optionsChanged: function() {
+      if (this.auto) {
+        this.load();
+      }
+    },
+
+    /**
+     * This method has to be overridden to contain real loading logic.
+     */
+    _load: function() {
+      throw new Error('Missing data loading implementation')
+    }
+
+  }
+</script>

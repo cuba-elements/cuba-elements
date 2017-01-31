@@ -1,0 +1,164 @@
+<link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="../cuba-app/cuba-app-aware-behavior.html">
+<link rel="import" href="cuba-data-loading-behavior.html">
+
+<!--
+The `cuba-entities` element provides an ability to load list of entities.
+-->
+
+<dom-module id="cuba-entities">
+  <template>
+    <style>
+      :host {
+        display: none;
+      }
+    </style>
+  </template>
+
+  <script>
+    Polymer({
+
+      is: 'cuba-entities',
+
+      behaviors: [CubaAppAwareBehavior, CubaDataLoadingBehavior],
+
+      properties: {
+        /**
+         * Entity name as specified in domain model class via `@Entity` annotation e.g. sec$User
+         */
+        entityName: String,
+        /**
+         * Name of the view which is used for loading entities.
+         */
+        view: {
+          type: String,
+          value: null
+        },
+        /**
+         * Name of the field to be sorted by. If the name is preceeding by the '+' character,
+         * then the sort order is ascending, if by the '-' character then descending.
+         * If there is no special character before the property name, then ascending sort will be used.
+         */
+        sort: {
+          type: String,
+          value: null
+        },
+        /**
+         * Number of extracted entities.
+         */
+        limit: {
+          type: Number,
+          value: null
+        },
+        /**
+         * Position of the first result to retrieve.
+         */
+        offset: {
+          type: Number,
+          value: null
+        },
+
+        provideCount: {
+          type: Boolean,
+          value: false
+        },
+
+        count: {
+          type: Number,
+          notify: true,
+          readOnly: true
+        },
+
+        _loadMoreOffset: {
+          type: Number,
+          value: null
+        }
+      },
+
+      observers: [
+        '_optionsChanged(app, entityName, view, sort, limit, offset, auto)',
+        '_countOptionsChanged(app, entityName, auto, provideCount)'
+      ],
+
+      /**
+       * Deletes entity and removes it from `data` collection.
+       * @paprm {Object} must contain `id` and `_entityName` fields
+       * @return {Promise}
+       */
+      remove: function (entity) {
+        return this.app.deleteEntity(entity._entityName, entity.id).then(function () {
+          if (!this.data || !Array.isArray(this.data)) {
+            return;
+          }
+          if (this.provideCount) {
+            this.loadCount();
+          }
+          for (var i = 0; i < this.data.length; i++) {
+            if (this.data[i].id === entity.id) {
+              this.splice("data", i, 1);
+            }
+          }
+        }.bind(this));
+      },
+
+      loadMore: function () {
+        if (!this.data) {
+          throw new Error('Data is not loaded yet');
+        }
+        if (!this.limit) {
+          throw new Error('Limit is not specified');
+        }
+
+        if (!this._loadMoreOffset) {
+          this._loadMoreOffset = this.offset + this.limit;
+        } else {
+          this._loadMoreOffset += this.limit;
+        }
+        var options = this._getOptions();
+        options.offset = this._loadMoreOffset;
+        this._setLoading(true);
+
+        return this.app.loadEntities(this.entityName, options).then(
+          function (data) {
+            data.forEach(function (v) {
+              this.push('data', v);
+            }.bind(this));
+            this._setLoading(false);
+          }.bind(this),
+          function() {
+            this._setLoading(false);
+            this.fire("cuba-data-loading-error");
+          }.bind(this)
+        );
+      },
+
+      loadCount: function() {
+        var loadCountPromise = this.app.queryCount(this.entityName, 'all', null);
+        loadCountPromise.then(function (count) {
+          this._setCount(parseInt(count));
+        }.bind(this));
+        return loadCountPromise;
+      },
+
+      _load: function () {
+        this._loadMoreOffset = null;
+        return this.app.loadEntities(this.entityName, this._getOptions());
+      },
+
+      _getOptions: function () {
+        var opts = {};
+        if (this.view) opts.view = this.view;
+        if (this.sort) opts.sort = this.sort;
+        if (this.limit) opts.limit = this.limit;
+        if (this.offset) opts.offset = this.offset;
+        return opts;
+      },
+
+      _countOptionsChanged: function(entityName, auto, provideCount) {
+        if (auto && provideCount) {
+          this.loadCount();
+        }
+      }
+    });
+  </script>
+</dom-module>

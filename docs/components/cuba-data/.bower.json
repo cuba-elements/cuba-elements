@@ -1,0 +1,25 @@
+{
+  "name": "cuba-data",
+  "version": "0.2.0",
+  "main": "cuba-data.html",
+  "dependencies": {
+    "polymer": "Polymer/polymer#^1.7.0",
+    "cuba-app": "cuba-elements/cuba-app#^0.2.0"
+  },
+  "devDependencies": {
+    "iron-component-page": "PolymerElements/iron-component-page#^1.0.0",
+    "iron-demo-helpers": "PolymerElements/iron-demo-helpers#^1.0.0",
+    "web-component-tester": "^4.0.0",
+    "webcomponentsjs": "webcomponents/webcomponentsjs#^0.7.0"
+  },
+  "homepage": "https://github.com/cuba-elements/cuba-data",
+  "_release": "0.2.0",
+  "_resolution": {
+    "type": "version",
+    "tag": "v0.2.0",
+    "commit": "dcea6cb430b40db59b0633160990fcccad914925"
+  },
+  "_source": "git://github.com/cuba-elements/cuba-data.git",
+  "_target": "^0.2.0",
+  "_originalSource": "cuba-elements/cuba-data"
+}

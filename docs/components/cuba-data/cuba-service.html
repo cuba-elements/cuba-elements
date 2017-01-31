@@ -1,0 +1,53 @@
+<link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="../cuba-app/cuba-app-aware-behavior.html">
+<link rel="import" href="cuba-data-loading-behavior.html">
+
+<!--
+The `cuba-service` element provides an ability to load data from [middleware service](https://doc.cuba-platform.com/manual-latest/services.html).
+The service should be [exposed](https://doc.cuba-platform.com/manual-latest/rest_api_v2_services_config.html) in REST API.
+-->
+
+<dom-module id="cuba-service">
+  <template>
+    <style>
+      :host {
+        display: none;
+      }
+    </style>
+  </template>
+
+  <script>
+    Polymer({
+
+      is: 'cuba-service',
+
+      behaviors: [CubaAppAwareBehavior, CubaDataLoadingBehavior],
+
+      properties: {
+        serviceName: String,
+        method: String,
+        params: {
+          type: Object,
+          value: function() {
+            return {}
+          }
+        },
+        /**
+         * Type of data format expected in response. Currently supported: `text`, `json`, `blob`.
+         */
+        handleAs: {
+          type: String,
+          value: 'json'
+        }
+      },
+
+      observers: ['_optionsChanged(app, serviceName, method, handleAs, params.*, auto)'],
+
+      _load: function() {
+        return this.app.invokeService(this.serviceName, this.method, this.params, {
+          handleAs: this.handleAs
+        });
+      }
+    });
+  </script>
+</dom-module>

@@ -1,0 +1,48 @@
+<link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="../cuba-app/cuba-app-aware-behavior.html">
+<link rel="import" href="cuba-data-loading-behavior.html">
+
+<!--
+The `cuba-entity` element provides an ability to load specific entity by Id.
+-->
+<dom-module id="cuba-entity">
+  <template>
+    <style>
+      :host {
+        display: none;
+      }
+    </style>
+  </template>
+  <script>
+    Polymer({
+      is: 'cuba-entity',
+
+      behaviors: [CubaAppAwareBehavior, CubaDataLoadingBehavior],
+
+      properties: {
+        /**
+         * Entity name as specified in domain model class via `@Entity` annotation e.g. sec$User
+         */
+        entityName: String,
+        entityId: String,
+        /**
+         * Name of the [view](See https://doc.cuba-platform.com/manual-latest/views.html) which is used for loading entities.
+         */
+        view: {
+          type: String,
+          value: null
+        }
+      },
+
+      observers: ['_optionsChanged(app, entityName, entityId, view, auto)'],
+
+      _load: function() {
+        if (this.entityName == null || this.entityId == null) {
+          return;
+        }
+        return this.app.loadEntity(this.entityName, this.entityId, {view: this.view});
+      }
+
+    });
+  </script>
+</dom-module>

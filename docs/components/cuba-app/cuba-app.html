@@ -1,0 +1,75 @@
+<link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="../promise-polyfill/promise-polyfill-lite.html">
+
+<!--
+The `cuba-app` element is used for initialization and configuration connection to CUBA REST API.
+Adds `cuba` object to the global JS scope.
+-->
+<dom-module id="cuba-app">
+  <template>
+    <style>
+      :host {
+        display: block;
+      }
+    </style>
+    <content></content>
+  </template>
+  <script src="cuba.js"></script>
+  <script>
+    (function(){
+      "use strict";
+
+      Polymer({
+        is: 'cuba-app',
+        properties: {
+          /**
+           * Connection URL to CUBA REST API v2.
+           * Trailing slash required.
+           */
+          apiUrl: {
+            type: String
+          },
+
+          name: {
+            type: String,
+            value: ""
+          },
+
+          app: {
+            type: Object,
+            readOnly: true,
+            notify: true
+          }
+        },
+
+        observers: ['_setupApp(apiUrl, name)'],
+
+        _setupApp: function(apiUrl, name) {
+
+          if (this.app) {
+            throw new Error("Cuba app is already initialized");
+          }
+
+          this._setApp(cuba.initializeApp({
+            name: this.name,
+            apiUrl: this.apiUrl
+          }));
+
+          this.fire('cuba-app-initialized');
+
+          this.app.onTokenExpiry(function() {
+            this.fire('cuba-token-expired');
+          }.bind(this));
+
+        }
+      });
+    })();
+
+    /**
+     * Fired on attempt to access REST API without or with expired token.
+     * Usually it means that user login required. See `cuba-login`
+     *
+     * @event cuba-token-expired
+     */
+  </script>
+</dom-module>

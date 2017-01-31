@@ -1,0 +1,137 @@
+<link rel="import" href="cuba-app-aware-behavior.html">
+<script>
+  (function() {
+
+    /**
+     * @polymerBehavior CubaLocalizeBehavior
+     */
+    CubaLocalizeBehaviorImpl = {
+
+      properties: {
+
+        useKeyIfMissing: {
+          type: Boolean,
+          value: true
+        },
+
+        enums: {
+          type: Object,
+          readonly: true
+        },
+
+        messages: {
+          type: Object,
+          value: {}
+        },
+
+        serverMessages: {
+          type: Object,
+          readonly: true,
+          value: {}
+        },
+
+        msg: {
+          type: Function,
+          computed: '__computeMsg(app, serverMessages, messages)'
+        },
+
+        enumValues: {
+          type: Function,
+          computed: '__computeEnumValues(app, enums)'
+        }
+
+      },
+
+      attached: function() {
+        this.__subscriptions = [];
+        if (this.app.messagesCache) {
+          this.serverMessages = this.app.messagesCache;
+          this.notifyPath('serverMessages');
+        }
+        this.__subscriptions.push(
+          this.app.onMessagesLoaded(function(serverMessages) {
+            if (!serverMessages) {
+              return;
+            }
+            this.serverMessages = serverMessages;
+            this.notifyPath('serverMessages');
+          }.bind(this))
+        );
+
+        if (this.app.enumsCache) {
+          this.enums = _convertEnums(this.app.enumsCache);
+          this.notifyPath('enums');
+        }
+        this.__subscriptions.push(
+          this.app.onEnumsLoaded(function(enums) {
+            if (!enums) {
+              return;
+            }
+            this.enums = _convertEnums(enums);
+            this.notifyPath('enums');
+          }.bind(this))
+        );
+        this.__subscriptions.push(
+          this.app.onLocaleChange(function(locale) {
+            var messages = this.messages;
+            this.set('messages', {});
+            this.set('messages', messages);
+          }.bind(this))
+        );
+      },
+
+      detached: function() {
+        for (var i = 0; i < this.__subscriptions.length; i++) {
+          this.__subscriptions[i]();
+        }
+      },
+
+      __computeMsg: function(app, serverMessages, messages) {
+        return function(key) {
+
+          var message = messages[cuba.getApp().locale] ? messages[cuba.getApp().locale][key] : null;
+
+          if (!message) {
+            message = serverMessages[key];
+          }
+
+          if (!message) {
+            return this.useKeyIfMissing ? key : '';
+          }
+          return message;
+        }
+      },
+
+      __computeEnumValues: function(app, enums) {
+        return function(enumName) {
+          return enums[enumName];
+        }
+      }
+    };
+
+    CubaLocalizeBehavior = [
+      CubaAppAwareBehavior,
+      CubaLocalizeBehaviorImpl
+    ];
+
+    function _convertEnums(enums) {
+      var convertedEnums = {};
+      enums.map(function(e) {
+        convertedEnums[e.name] = _convertEnumValues(e.values);
+      });
+      return convertedEnums;
+    }
+
+    function _convertEnumValues(rawValues) {
+      var values = [];
+      rawValues.forEach(function(rawValue) {
+        values.push({
+          id: rawValue.id,
+          value: rawValue.name,
+          label: rawValue.caption
+        });
+      });
+      return values;
+    }
+  })();
+</script>
