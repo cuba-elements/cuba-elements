@@ -9,6 +9,8 @@
     "cuba-data": "cuba-elements/cuba-data#^0.2.0",
     "cuba-form": "cuba-elements/cuba-form#^0.2.0",
     "cuba-login": "cuba-elements/cuba-login#^0.2.0",
-    "cuba-styles": "cuba-elements/cuba-styles#^0.1.0"
+    "cuba-styles": "cuba-elements/cuba-styles#^0.1.0",
+    "cuba-file-field": "cuba-elements/cuba-file-field#^0.1.0",
+    "cuba-ui": "cuba-elements/cuba-ui#^0.1.0"
   }
 }

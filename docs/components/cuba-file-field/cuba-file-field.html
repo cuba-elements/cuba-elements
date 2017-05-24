@@ -1,0 +1,150 @@
+<!--
+
+Polymer element for uploading files to CUBA application. Once file is uploaded file descriptor object is
+bound to `fileDescriptor` property.
+
+```html
+<cuba-file-field file-descriptor="{{fileDescriptor}}"></cuba-file-field>
+```
+
+The element wraps `vaadin-upload` component.
+
+-->
+
+<link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="../vaadin-upload/vaadin-upload.html">
+<link rel="import" href="../cuba-app/cuba-app-aware-behavior.html">
+
+<dom-module id="cuba-file-field">
+  <template>
+    <style>
+      :host {
+        display: block;
+      }
+
+      vaadin-upload-file {
+        --vaadin-upload-file-meta-complete: {
+          color: var(--primary-color);
+          text-decoration: underline;
+          cursor: pointer;
+        }
+      }
+    </style>
+
+    <vaadin-upload id="vaadinUpload"
+                   max-files="1"
+                   target="[[app.apiUrl]]v2/files"
+                   headers="[[_computeHeaders(app, app.restApiToken)]]"
+                   files="{{files}}">
+      <div class="file-list">
+        <template is="dom-repeat" items="[[files]]" as="file">
+          <vaadin-upload-file file="[[file]]" on-tap="_handleFileClick"></vaadin-upload-file>
+        </template>
+      </div>
+    </vaadin-upload>
+  </template>
+  <script>
+    Polymer({
+
+      is: 'cuba-file-field',
+
+      behaviors: [CubaAppAwareBehavior],
+
+      properties: {
+        /**
+         * Label to be shown on the upload button.
+         */
+        label: {
+          type: String
+        },
+
+        /**
+         * File descriptor object.
+         */
+        fileDescriptor: {
+          type: Object,
+          notify: true
+        },
+
+
+        /**
+         * The array of files being processed, or already uploaded. Bound to the corresponding property of
+         * `vaadin-upload`.
+         * Currently only single file is supported.
+         */
+        files: {
+          type: Array,
+          notify: true
+        }
+      },
+
+      observers: [
+        '_handleFdChange(fileDescriptor)',
+        '_handleLabelChange(label)'
+      ],
+
+      listeners: {
+        'vaadinUpload.file-remove': '_handleFileRemove',
+        'vaadinUpload.upload-success': '_handleUploadSuccess'
+      },
+
+      _computeHeaders: function() {
+        if (this.app.restApiToken) {
+          return {
+            Authorization: "Bearer " + this.app.restApiToken
+          };
+        }
+        return {};
+      },
+
+      _handleUploadSuccess: function(event, data) {
+        var resp = JSON.parse(data.xhr.responseText);
+        this.fileDescriptor = resp;
+        this.fire('cuba-upload-success', resp);
+      },
+
+      _handleFdChange: function() {
+        if (this.fileDescriptor) {
+          this.$.vaadinUpload.files = [{
+            fileDescriptorId: this.fileDescriptor.id,
+            name: this.fileDescriptor.name,
+            complete: true
+          }];
+        } else {
+          this.$.vaadinUpload.files = [];
+        }
+      },
+
+      _handleFileRemove: function() {
+        this.fileDescriptor = null;
+      },
+
+      _handleLabelChange: function() {
+        if (this.label) {
+          this.$.vaadinUpload.i18n.addFiles.one = this.label;
+          this.$.vaadinUpload.notifyPath('i18n.addFiles.one');
+        }
+      },
+
+      _handleFileClick: function(event) {
+        if (Polymer.dom(event).rootTarget.id !== 'name') {
+          return;
+        }
+        var file = event.model.file;
+        if (file && file.fileDescriptorId) {
+          var url = this.app.apiUrl + 'v2/files/' + file.fileDescriptorId;
+          if (this.app.restApiToken) {
+            url += '?access_token=' + this.app.restApiToken;
+          }
+          return window.open(url, '_blank');
+        }
+      }
+    });
+    /**
+     * Fired when a file has been successfully uploaded
+     *
+     * @event cuba-upload-success
+     * @param {Object} detail response from the server
+     */
+  </script>
+</dom-module>

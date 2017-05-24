@@ -1,0 +1,48 @@
+<script>
+  /**
+   * @polymerBehavior CubaEntityListViewBehavior
+   */
+  CubaEntityListViewBehavior = {
+
+    properties: {
+      active: {
+        type: Boolean,
+        value: false
+      },
+      entities: Array,
+      entitiesCount: Number,
+      moreDataAvailable: {
+        type: Boolean,
+        computed: '_computeMoreDataAvailable(entities, entitiesCount, entities.*)',
+        value: false
+      },
+      dataLoading: {
+        type: Boolean,
+        notify: true
+      },
+      selectedEntity: {
+        type: Object,
+        notify: true
+      }
+    },
+    reload: function() {
+      this.$.data.loadCount();
+      return this.$.data.load();
+    },
+    remove: function(entity) {
+      this.$.data.remove(entity);
+    },
+    _loadMore: function() {
+      this.$.data.loadMore();
+    },
+    _computeMoreDataAvailable: function(entities, entitiesCount) {
+      return entities.length < entitiesCount;
+    },
+    _handleItemTap: function(event) {
+      this.fire('item-tap', event.model.item);
+    },
+    _handleSelectionChange: function(event) {
+      this.selectedEntity = this.$.entitiesList.itemForElement(event.detail.item);
+    }
+  }
+</script>

@@ -1,0 +1,42 @@
+<script>
+  /**
+   * @polymerBehavior CubaEntityEditViewBehavior
+   */
+  CubaEntityEditViewBehavior = {
+    properties: {
+      entityId: {
+        type: String,
+        value: null,
+        observer: '_handleEntityIdChange'
+      },
+      entity: {
+        type: Object,
+        value: function() {
+          return {}
+        }
+      }
+    },
+    _handleEntityIdChange: function(newValue) {
+      this.entity = {};
+    },
+    _save: function() {
+      this.$.form.submit();
+    },
+    _onSuccess: function() {
+      this.fire("commit");
+    },
+    _onError: function() {
+      this.$.errorMessage.show();
+    },
+    _cancel: function() {
+      this.set("serverErrors", {});
+      this.fire("cancel");
+    },
+    _delete: function() {
+      this.fire("delete", {entity: this.entity});
+    },
+    _isInvalid: function(err) {
+      return typeof err !== 'undefined';
+    }
+  }
+</script>

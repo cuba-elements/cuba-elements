@@ -1,0 +1,112 @@
+<link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="../paper-button/paper-button.html"/>
+<link rel="import" href="../paper-dialog/paper-dialog.html"/>
+<link rel="import" href="../paper-dialog-scrollable/paper-dialog-scrollable.html"/>
+
+<!--
+`cuba-lookup` component provides an ability to specify entity `-list` component
+in order to select an entity instance for a reference attribute.
+The list component should be marked with `.lookup-screen` class.
+
+
+    <link rel="demo-manufacturers-by-country.html">
+
+    <cuba-lookup picked-entity="{{entity.manufacturer}}">
+      <div class="dropdown">
+      ...
+      </div>
+      <demo-manufacturers-by-country class="lookup-screen"></demo-manufacturers-by-country>
+    </cuba-lookup>
+-->
+
+<dom-module id="cuba-lookup">
+  <template>
+    <style>
+      :host {
+        display: block;
+      }
+      .layout {
+        display: flex;
+      }
+      .layout .dropdown {
+        flex-grow: 1;
+      }
+      .lookup-toggle {
+        padding-top: 20px;
+      }
+      paper-dialog#lookupDialog {
+        width: 100%;
+        max-width: 900px;
+      }
+    </style>
+
+    <div class="layout">
+      <div class="dropdown">
+        <content select=".dropdown"></content>
+      </div>
+      <template is="dom-if" if="[[_lookupElement]]">
+        <div class="lookup-toggle" on-tap="showLookupScreen">
+          <paper-icon-button icon="search"></paper-icon-button>
+        </div>
+      </template>
+    </div>
+
+    <paper-dialog id="lookupDialog">
+      <paper-dialog-scrollable>
+        <content id="lookupContent" select=".lookup-screen"></content>
+      </paper-dialog-scrollable>
+      <div class="buttons">
+        <paper-button on-tap="_cancel">Cancel</paper-button>
+        <paper-button autofocus on-tap="_select" disabled$="[[!selectedEntity]]">Select</paper-button>
+      </div>
+    </paper-dialog>
+
+  </template>
+  <script>
+    Polymer({
+      is: 'cuba-lookup',
+      properties: {
+        /**
+         * Entity which has been picked by user.
+         */
+        pickedEntity: {
+          type: Object,
+          notify: true
+        },
+
+        /**
+         * Entity which is currently selected in lookup dialog.
+         */
+        selectedEntity: {
+          type: Object,
+          notify: true,
+          value: null
+        },
+        _lookupElement: Object
+      },
+      ready: function() {
+        var lookupElements = Polymer.dom(this.$.lookupContent).getDistributedNodes();
+        if (lookupElements.length > 0) {
+          this._lookupElement = lookupElements[0];
+          this._lookupElement.addEventListener('selected-entity-changed', function(event) {
+            this.selectedEntity = event.detail.value;
+          }.bind(this));
+        }
+      },
+      showLookupScreen: function() {
+        this._lookupElement.reload().then(function() {
+          this.$.lookupDialog.open();
+        }.bind(this));
+      },
+      _select: function() {
+        this.pickedEntity = this.selectedEntity;
+        this.$.lookupDialog.close();
+      },
+      _cancel: function() {
+        this.selectedEntity = null;
+        this.pickedEntity = null;
+        this.$.lookupDialog.close();
+      }
+    });
+  </script>
+</dom-module>
