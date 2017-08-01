@@ -13,6 +13,6 @@ In a real applications import particular elements as you use them.
 ```
 bower install cuba-elements/cuba-elements
 
-<import rel="../bower_components/cuba-elements.html">
+<import rel="import" href="../bower_components/cuba-elements.html">
 
 ```
