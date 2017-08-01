@@ -12,5 +12,9 @@
     "cuba-styles": "cuba-elements/cuba-styles#^0.1.0",
     "cuba-file-field": "cuba-elements/cuba-file-field#^0.1.0",
     "cuba-ui": "cuba-elements/cuba-ui#^0.1.0"
-  }
+  },
+  "ignore": [
+    "docs",
+    "*.sh"
+  ]
 }
