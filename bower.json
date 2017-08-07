@@ -1,17 +1,16 @@
 {
   "name": "cuba-elements",
-  "version": "0.2.0",
   "main": [
     "cuba-elements.html"
   ],
   "dependencies": {
-    "cuba-app": "cuba-elements/cuba-app#^0.2.0",
-    "cuba-data": "cuba-elements/cuba-data#^0.2.0",
-    "cuba-form": "cuba-elements/cuba-form#^0.2.0",
-    "cuba-login": "cuba-elements/cuba-login#^0.2.0",
-    "cuba-styles": "cuba-elements/cuba-styles#^0.1.0",
-    "cuba-file-field": "cuba-elements/cuba-file-field#^0.1.0",
-    "cuba-ui": "cuba-elements/cuba-ui#^0.1.0"
+    "cuba-app": "cuba-elements/cuba-app#polymer2",
+    "cuba-data": "cuba-elements/cuba-data#polymer2",
+    "cuba-form": "cuba-elements/cuba-form#polymer2",
+    "cuba-login": "cuba-elements/cuba-login#polymer2",
+    "cuba-styles": "cuba-elements/cuba-styles#polymer2",
+    "cuba-file-field": "cuba-elements/cuba-file-field#polymer2",
+    "cuba-ui": "cuba-elements/cuba-ui#polymer2"
   },
   "ignore": [
     "docs",
